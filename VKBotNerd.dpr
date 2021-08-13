@@ -4,6 +4,7 @@ program VKBotNerd;
 
 uses
   System.SysUtils,
+  REST.Json,
   VK.Bot,
   VK.Types,
   VK.Bot.Utils,
@@ -15,18 +16,39 @@ uses
   Bot.OWM in 'Bot.OWM.pas',
   Bot.Welcome in 'Bot.Welcome.pas',
   Bot.Ping in 'Bot.Ping.pas',
-  Bot.GameShoot in 'Bot.GameShoot.pas';
+  Bot.GameShoot in 'Bot.GameShoot.pas',
+  HGM.SQLang in '..\SQLite\HGM.SQLang.pas',
+  HGM.SQLite in '..\SQLite\HGM.SQLite.pas',
+  HGM.SQLite.Wrapper in '..\SQLite\HGM.SQLite.Wrapper.pas',
+  Bot.DB in 'Bot.DB.pas',
+  Bot.Voice in 'Bot.Voice.pas',
+  SpeechLib_TLB in 'SpeechLib_TLB.pas',
+  bass in '..\#Fork\Bass\delphi\bass.pas',
+  bassenc in '..\#Fork\Bass\delphi\bassenc.pas',
+  Bot.YBalaboba in 'Bot.YBalaboba.pas',
+  Bot.RandomNoise in 'Bot.RandomNoise.pas';
 
 begin
+  ReportMemoryLeaksOnShutdown := True;
+  TDB.Init;
+  TGeneralListener.Init;
   with TVkBotChat.GetInstance(192458090, '892add820fa363f2db8e9d8fc80eaeb7880177233515368da7dd95f3092bc8596786e5d4eaee7b0f96ae2') do
   try
-    AddMessageListener([TVkPeerType.Chat], TWelcomeListener.Welcome);
+    AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TGeneralListener.Welcome);
+    AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TGeneralListener.Censor);
+    AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TGeneralListener.Mute);
     AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TIpInfoListener.GetIpInfo);
     AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TOWMListener.GetCurrentWeather);
     AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TPingListener.Ping);
     AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TPingListener.HostToIp);
     AddMessageListener([TVkPeerType.Chat], TGameShootListener.Proc);
-    AddMessageListener([TVkPeerType.Chat], TWelcomeListener.Ended);
+    AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TVoiceListener.Proc);
+    AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TVoiceListener.Anekdot);
+    AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TBalabobaListener.SayForLast);
+    AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TBalabobaListener.Say);
+    AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TRandomNoiseListener.Proc);
+    AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TBalabobaListener.SaveLastMessage);
+    AddMessageListener([TVkPeerType.Chat], TGeneralListener.Ended);
 
     if Init and Run then
       Console.Run(
@@ -35,8 +57,8 @@ begin
           Quit := Command.Equals('exit');
         end);
   finally
+    TDB.UnInit;
     Free;
-    Readln;
   end;
 end.
 

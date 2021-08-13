@@ -59,13 +59,13 @@ begin
   begin
     if Assigned(OWM) and OWM.Current(Weather, Query, TOWMUnit.Metric) then
     try
-      Bot.API.Messages.New.PeerId(Message.PeerId).ReplyTo(Message.Id).Message(WeatherToString(Weather)).Send.Free;
+      Bot.API.Messages.SendToPeer(Message.PeerId, WeatherToString(Weather));
       Result := True;
     finally
       Weather.Free;
     end;
     if not Result then
-      Bot.API.Messages.New.PeerId(Message.PeerId).ReplyTo(Message.Id).Message('Не удалось получить данные о погоде').Send.Free;
+      Bot.API.Messages.SendToPeer(Message.PeerId, 'Не удалось получить данные о погоде');
   end;
 end;
 

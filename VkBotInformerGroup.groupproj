@@ -1,0 +1,120 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{E1203BD5-F922-4FF8-A433-E4FD6907DFB4}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="VKBotNerd.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\VK_API\Samples\Bot\VKBotTemplate.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\Weather\Weather.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\OWM_API\Sample\OWM_Sample.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\VK_API\VKComponents.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\GCF_Bot\GFCBot.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\VKBotTemplate\VKBotApp.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\FMXAudio\Sample\VCLPlayer\VCLSample.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="VKBotNerd">
+        <MSBuild Projects="VKBotNerd.dproj"/>
+    </Target>
+    <Target Name="VKBotNerd:Clean">
+        <MSBuild Projects="VKBotNerd.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="VKBotNerd:Make">
+        <MSBuild Projects="VKBotNerd.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="VKBotTemplate">
+        <MSBuild Projects="..\VK_API\Samples\Bot\VKBotTemplate.dproj"/>
+    </Target>
+    <Target Name="VKBotTemplate:Clean">
+        <MSBuild Projects="..\VK_API\Samples\Bot\VKBotTemplate.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="VKBotTemplate:Make">
+        <MSBuild Projects="..\VK_API\Samples\Bot\VKBotTemplate.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Weather">
+        <MSBuild Projects="..\Weather\Weather.dproj"/>
+    </Target>
+    <Target Name="Weather:Clean">
+        <MSBuild Projects="..\Weather\Weather.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Weather:Make">
+        <MSBuild Projects="..\Weather\Weather.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="OWM_Sample">
+        <MSBuild Projects="..\OWM_API\Sample\OWM_Sample.dproj"/>
+    </Target>
+    <Target Name="OWM_Sample:Clean">
+        <MSBuild Projects="..\OWM_API\Sample\OWM_Sample.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="OWM_Sample:Make">
+        <MSBuild Projects="..\OWM_API\Sample\OWM_Sample.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="VKComponents">
+        <MSBuild Projects="..\VK_API\VKComponents.dproj"/>
+    </Target>
+    <Target Name="VKComponents:Clean">
+        <MSBuild Projects="..\VK_API\VKComponents.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="VKComponents:Make">
+        <MSBuild Projects="..\VK_API\VKComponents.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="GFCBot">
+        <MSBuild Projects="..\GCF_Bot\GFCBot.dproj"/>
+    </Target>
+    <Target Name="GFCBot:Clean">
+        <MSBuild Projects="..\GCF_Bot\GFCBot.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="GFCBot:Make">
+        <MSBuild Projects="..\GCF_Bot\GFCBot.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="VKBotApp">
+        <MSBuild Projects="..\VKBotTemplate\VKBotApp.dproj"/>
+    </Target>
+    <Target Name="VKBotApp:Clean">
+        <MSBuild Projects="..\VKBotTemplate\VKBotApp.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="VKBotApp:Make">
+        <MSBuild Projects="..\VKBotTemplate\VKBotApp.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="VCLSample">
+        <MSBuild Projects="..\FMXAudio\Sample\VCLPlayer\VCLSample.dproj"/>
+    </Target>
+    <Target Name="VCLSample:Clean">
+        <MSBuild Projects="..\FMXAudio\Sample\VCLPlayer\VCLSample.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="VCLSample:Make">
+        <MSBuild Projects="..\FMXAudio\Sample\VCLPlayer\VCLSample.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="VKBotNerd;VKBotTemplate;Weather;OWM_Sample;VKComponents;GFCBot;VKBotApp;VCLSample"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="VKBotNerd:Clean;VKBotTemplate:Clean;Weather:Clean;OWM_Sample:Clean;VKComponents:Clean;GFCBot:Clean;VKBotApp:Clean;VCLSample:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="VKBotNerd:Make;VKBotTemplate:Make;Weather:Make;OWM_Sample:Make;VKComponents:Make;GFCBot:Make;VKBotApp:Make;VCLSample:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

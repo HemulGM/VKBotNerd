@@ -13,42 +13,52 @@ type
 implementation
 
 uses
-  VK.Types, VK.Bot.Utils;
+  VK.Types, VK.Bot.Utils, VK.Entity.Keyboard, System.StrUtils;
 
 { TGameShootListener }
 
 class function TGameShootListener.Proc(Bot: TVkBot; GroupId: Integer; Message: TVkMessage; ClientInfo: TVkClientInfo): Boolean;
 var
   Query, Keys: string;
+  Keyboard: TVkKeyboardConstruct;
 begin
   Result := False;
-  Keys := '' +
-    '{' +
-    '  "one_time":false, ' +
-    '  "inline":true, ' +
-    '  "buttons":' +
-    '      [ ' +
-    '        [ ' +
-    '          { "action": ' +
-    '             { "type": "text", ' +
-    '               "payload": "{\"button\": \"game_shoot\"}", ' +
-    '               "label": "Выстрелить" ' +
-    '             }, ' +
-    '            "color":"negative"' +
-    '          }' +
-    '        ]' +
-    '      ]' +
-    '}';
-  if not Message.Payload.IsEmpty then
+  Keyboard := TVkKeyboard.Construct;
+  try
+    Keyboard.InlineKeys(True);
+    with Keyboard.AddLine do
+    begin
+      AddButton(TVkKeyboardButtonConstruct.CreateText('Выстрелить', ButtonPayload('game_shoot'), TVkKeyboardButtonColor.Negative));
+      AddButton(TVkKeyboardButtonConstruct.CreateText('Я сыкло', ButtonPayload('game_shoot_lose'), TVkKeyboardButtonColor.Secondary));
+    end;
+    Keys := Keyboard.ToJsonString;
+  finally
+    Keyboard.Free;
+  end;
+  if Assigned(Message.PayloadButton) then
   begin
-    if Message.Payload = '{"button":"game_shoot"}' then
-      if Random(10) in [1, 5] then
-        Query := '😵🔫 У нас натурал!' + #13#10 +
-          'Может быть на том свете тебе повезёт больше. Покойся с миром.'
-      else
-        Query := '😨🔫 Вот это смельчак! Ты остался геем после нажатия на курок!' + #13#10 +
-          'Больше так не рискуй. Подумай о маме и папе!';
-    Bot.API.Messages.New.PeerId(Message.PeerId).Message(Query).Keyboard(Keys).Send.Free;
+    case IndexStr(Message.PayloadButton.Button, ['game_shoot', 'game_shoot_lose']) of
+      0:
+        begin
+          //Bot.API.Messages.DeleteInChat(Message.PeerId, Message.ConversationMessageId, True);
+          if Random(6) = 2 then
+            Query := '😵🔫 У нас натурал!' + #13#10 +
+              'Может быть на том свете тебе повезёт больше. Покойся с миром.'
+          else
+            Query := '😨🔫 Вот это смельчак! Ты остался геем после нажатия на курок!' + #13#10 +
+              'Больше так не рискуй. Подумай о маме и папе!';
+        end;
+      1:
+        Query := 'У нас тут лузер 🤪';
+    else
+      Query := '';
+    end;
+
+    if not Query.IsEmpty then
+    begin
+      Bot.API.Messages.New.PeerId(Message.PeerId).Message(Query).Keyboard(Keys).Send.Free;
+      Exit(True);
+    end;
   end;
   if MessageIncludeAll(Message.Text, ['зануда', 'гей', 'рулетка']) then
   begin

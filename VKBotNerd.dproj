@@ -2,10 +2,10 @@
     <PropertyGroup>
         <ProjectGuid>{1C8F69CB-4EF8-4151-9665-7A8E13E74D3F}</ProjectGuid>
         <ProjectVersion>18.8</ProjectVersion>
-        <FrameworkType>None</FrameworkType>
+        <FrameworkType>VCL</FrameworkType>
         <MainSource>VKBotNerd.dpr</MainSource>
         <Base>True</Base>
-        <Config Condition="'$(Config)'==''">Debug</Config>
+        <Config Condition="'$(Config)'==''">Release</Config>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
         <TargetedPlatforms>1</TargetedPlatforms>
         <AppType>Console</AppType>
@@ -72,7 +72,7 @@
         <DCC_S>false</DCC_S>
         <DCC_F>false</DCC_F>
         <DCC_K>false</DCC_K>
-        <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;$(DCC_Namespace)</DCC_Namespace>
+        <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
         <SanitizedProjectName>VKBotNerd</SanitizedProjectName>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Android)'!=''">
@@ -166,6 +166,16 @@
         <DCCReference Include="Bot.Welcome.pas"/>
         <DCCReference Include="Bot.Ping.pas"/>
         <DCCReference Include="Bot.GameShoot.pas"/>
+        <DCCReference Include="..\SQLite\HGM.SQLang.pas"/>
+        <DCCReference Include="..\SQLite\HGM.SQLite.pas"/>
+        <DCCReference Include="..\SQLite\HGM.SQLite.Wrapper.pas"/>
+        <DCCReference Include="Bot.DB.pas"/>
+        <DCCReference Include="Bot.Voice.pas"/>
+        <DCCReference Include="SpeechLib_TLB.pas"/>
+        <DCCReference Include="..\#Fork\Bass\delphi\bass.pas"/>
+        <DCCReference Include="..\#Fork\Bass\delphi\bassenc.pas"/>
+        <DCCReference Include="Bot.YBalaboba.pas"/>
+        <DCCReference Include="Bot.RandomNoise.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

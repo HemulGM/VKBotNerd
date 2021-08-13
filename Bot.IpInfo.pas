@@ -59,13 +59,13 @@ begin
   begin
     if Assigned(IpInfo) and IpInfo.GetDetails(Details, IP) then
     try
-      Bot.API.Messages.New.PeerId(Message.PeerId).ReplyTo(Message.Id).Message(DetailsToString(Details)).Send.Free;
+      Bot.API.Messages.SendToPeer(Message.PeerId, DetailsToString(Details));
       Result := True;
     finally
       Details.Free;
     end;
     if not Result then
-      Bot.API.Messages.New.PeerId(Message.PeerId).ReplyTo(Message.Id).Message('Не удалось получить данные об IP').Send.Free;
+      Bot.API.Messages.SendToPeer(Message.PeerId, 'Не удалось получить данные об IP');
   end;
 end;
 

@@ -67,3 +67,7 @@ __recovery/
 
 # Boss dependency manager vendor folder https://github.com/HashLoad/boss
 modules/
+*.ogg
+*.wav
+*.mp3
+Win32/Debug/audio_cache/desktop.ini

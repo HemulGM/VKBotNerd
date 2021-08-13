@@ -27,9 +27,9 @@ begin
   begin
     Result := True;
     if HostNameToIP(Query, IP) then
-      Bot.API.Messages.New.PeerId(Message.PeerId).ReplyTo(Message.Id).Message(Query + ': ' + IP).Send.Free
+      Bot.API.Messages.SendToPeer(Message.PeerId, Query + ': ' + IP)
     else
-      Bot.API.Messages.New.PeerId(Message.PeerId).ReplyTo(Message.Id).Message('Не удалось выполнить запрос').Send.Free
+      Bot.API.Messages.SendToPeer(Message.PeerId, 'Не удалось выполнить запрос');
   end;
 end;
 
@@ -46,9 +46,9 @@ begin
     for i := 1 to 4 do
     begin
       if PingHost(Query, Time, 2000) then
-        Bot.API.Messages.New.PeerId(Message.PeerId).ReplyTo(Message.Id).Message('Ответ от ' + Query + ': число байт=32 время=' + Time.ToString + 'мс').Send.Free
+        Bot.API.Messages.SendToPeer(Message.PeerId, 'Ответ от ' + Query + ': число байт=32 время=' + Time.ToString + 'мс')
       else
-        Bot.API.Messages.New.PeerId(Message.PeerId).ReplyTo(Message.Id).Message('Не удалось выполнить запрос').Send.Free
+        Bot.API.Messages.SendToPeer(Message.PeerId, 'Не удалось выполнить запрос')
     end;
   end;
 end;
