@@ -14,6 +14,7 @@ type
     class function TextToAudioFile(var FN: string; Text: string): Boolean; static;
     class function SendVoice(Bot: TVkBot; PeerId: Integer; const Text: string): Boolean; static;
   public
+    class function ConvertToOgg(var Target: string; DeleteSource: Boolean): Boolean; static;
     class function Proc(Bot: TVkBot; GroupId: Integer; Message: TVkMessage; ClientInfo: TVkClientInfo): Boolean;
     class function Anekdot(Bot: TVkBot; GroupId: Integer; Message: TVkMessage; ClientInfo: TVkClientInfo): Boolean;
   end;
@@ -26,9 +27,43 @@ implementation
 uses
   VK.Types, VK.Bot.Utils, VK.Entity.Keyboard, System.StrUtils,
   VK.Entity.Doc.Save, Winapi.ActiveX, System.IOUtils, Winapi.Windows,
-  HGM.Common.Download, System.JSON;
+  HGM.Common.Download, System.JSON, bass, bassenc;
 
 { TVoiceListener }
+
+class function TVoiceListener.ConvertToOgg(var Target: string; DeleteSource: Boolean): Boolean;
+var
+  Stream: HSTREAM;
+  Encode: HENCODE;
+  Cmd, Old: string;
+  Bytes: TByteArray;
+begin
+  Result := False;
+  Old := Target;
+  Stream := BASS_StreamCreateFile(False, PAnsiChar(AnsiString(Old)), 0, 0, BASS_STREAM_DECODE);
+  if Stream <> 0 then
+  begin
+    Target := StringReplace(Old, '.wav', '.ogg', [rfIgnoreCase, rfReplaceAll]);
+    Target := StringReplace(Target, '.mp3', '.ogg', [rfIgnoreCase, rfReplaceAll]);
+    FileClose(FileCreate(Target));
+    Cmd := TPath.Combine(TPath.GetLibraryPath, 'oggenc2.exe') + ' -o "' + Target + '" -';
+    Encode := BASS_Encode_Start(Stream, PAnsiChar(AnsiString(Cmd)), BASS_ENCODE_AUTOFREE, nil, nil);
+    while (BASS_ChannelIsActive(Stream) <> BASS_ACTIVE_STOPPED) and (BASS_Encode_IsActive(Encode) <> BASS_ACTIVE_STOPPED) do
+    begin
+      BASS_ChannelGetData(Stream, @Bytes, SizeOf(Bytes));
+      Result := True;
+    end;
+
+    BASS_StreamFree(Stream);
+    if Result then
+    begin
+      if DeleteSource then
+        TFile.Delete(Old);
+    end
+    else
+      Target := Old;
+  end;
+end;
 
 function CreateRandomAudioFile: string;
 begin
@@ -41,14 +76,11 @@ end;
 
 class function TVoiceListener.TextToAudioFile(var FN: string; Text: string): Boolean;
 var
-  Tokens: ISpeechObjectTokens;
   FS: TSpFileStream;
   AF: TSpAudioFormat;
 begin
   CoInitialize(nil);
   try
-    Tokens := FVoice.GetVoices('', '');
-    FVoice.Voice := Tokens.Item(2);
     FS := TSpFileStream.Create(nil);
     AF := TSpAudioFormat.Create(nil);
     try
@@ -57,13 +89,13 @@ begin
       FN := CreateRandomAudioFile;
       FS.Open(FN, SSFMCreateForWrite, False);
       FVoice.AudioOutputStream := FS.DefaultInterface;
-      FVoice.Speak(Text, SVSFDefault);
+      FVoice.Speak(StringReplace(Text, #13#10, ' ', [rfReplaceAll]), SVSFDefault);
       FS.Close;
     finally
       FS.Free;
       AF.Free;
     end;
-    Result := FileExists(FN);
+    Result := FileExists(FN) and ConvertToOgg(FN, True);
   except
     Result := False;
   end;
@@ -154,12 +186,24 @@ begin
     Bot.API.Messages.DeleteInChat(Message.PeerId, Message.ConversationMessageId, True);
 end;
 
+var
+  Tokens: ISpeechObjectTokens;
+
 initialization
   Randomize;
   try
+    Console.AddText('Voice initializate...');
     TVoiceListener.FVoice := TSpVoice.Create(nil);
+    Tokens := TVoiceListener.FVoice.GetVoices('', '');
+    Console.AddLine(Tokens.Item(2).GetDescription(LOCALE_USER_DEFAULT), GREEN);
+    TVoiceListener.FVoice.Voice := Tokens.Item(2);
   except
   end;
+  Console.Addtext('Bass initializate...');
+  if BASS_Init(-1, 44100, 0, 0, nil) then
+    Console.AddLine('Ok', GREEN)
+  else
+    Console.AddLine('Fail', RED);
 
 finalization
   if Assigned(TVoiceListener.FVoice) then

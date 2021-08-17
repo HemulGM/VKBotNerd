@@ -29,6 +29,9 @@ var
 
 implementation
 
+uses
+  VK.Bot.Utils;
+
 { TDB }
 
 constructor TDB.Create;
@@ -140,8 +143,10 @@ end;
 
 class procedure TDB.Init;
 begin
+  Console.AddText('Database initializate...');
   if not Assigned(DB) then
     DB := TDB.Create;
+  Console.AddLine('Ok', GREEN);
 end;
 
 class procedure TDB.SetValue(const Section: Integer; Key: string; Value: Boolean);

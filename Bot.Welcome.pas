@@ -21,12 +21,14 @@ type
 implementation
 
 uses
-  VK.Types, VK.Bot.Utils, HGM.SQLang, System.IOUtils, Bot.DB, VK.Entity.ScreenName;
+  VK.Types, VK.Bot.Utils, HGM.SQLang, System.IOUtils, Bot.DB,
+  VK.Entity.ScreenName;
 
 { TGeneralListener }
 
 class procedure TGeneralListener.Init;
 begin
+  Console.AddText('GeneralListener initializate...');
   with SQL.CreateTable('users') do
   try
     AddField('id', ftInteger, True, True);
@@ -37,6 +39,7 @@ begin
   finally
     EndCreate;
   end;
+  Console.AddLine('Ok', GREEN);
 end;
 
 class function TGeneralListener.Mute(Bot: TVkBot; GroupId: Integer; Message: TVkMessage; ClientInfo: TVkClientInfo): Boolean;
@@ -94,7 +97,8 @@ begin
       '/speak hide {текст}, /скажи молча {текст}, /speak {текст}, /скажи {текст} - Озвучить текст'#13#10 +
       '/joke, /анекдот - Рассказать тупой анекдот (голос)'#13#10 +
       '/balaboba {текст}, зануда балабоба {текст}, /бла {текст} - Сочинить историю'#13#10 +
-      '/бла последнее, зануда бла последнее - Сочинить историю на последнее сообщение'
+      '/бла последнее, зануда бла последнее - Сочинить историю на последнее сообщение'#13#10 +
+      '/звук {текст} - Найти случайную звуковую дорожку по тексту'
       );
   end;
 end;
@@ -115,11 +119,22 @@ end;
 
 class function TGeneralListener.Censor(Bot: TVkBot; GroupId: Integer; Message: TVkMessage; ClientInfo: TVkClientInfo): Boolean;
 var
+  i: Integer;
   Str: string;
+  Strs: TArrayOfString;
 begin
   Result := False;
   if CheckForCensor(Message.Text.ToLowerInvariant, Str) then
-    Bot.API.Messages.SendToPeer(Message.PeerId, 'Давай без мата, ок? Я считаю, что слово "' + Str + '" - мат.');
+  begin
+    Strs := [
+      'Давай без мата, ок? Я считаю, что слово "%s" - мат.',
+      'Может без мата, а? Это "%s" ж - мат. Вроде как.',
+      'Слушай, может ты завалишь варежку? Матерится он тут.',
+      'МАТА НЕ НАДА. НЕ НАДА МАТА.',
+      'Фу, бля, матершинник.'];
+    i := Random(Length(Strs));
+    Bot.API.Messages.SendToPeer(Message.PeerId, Format(Strs[i], [Str]));
+  end;
 end;
 
 class function TGeneralListener.Ended(Bot: TVkBot; GroupId: Integer; Message: TVkMessage; ClientInfo: TVkClientInfo): Boolean;

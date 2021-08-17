@@ -96,9 +96,10 @@ begin
                   FL.Free;
                   FL := nil;
                   Result := False;
-                  if FileExists(FN) then
+                  Query := FN;
+                  if FileExists(Query) and TVoiceListener.ConvertToOgg(Query, False) then
                   begin
-                    Result := SendDoc(Bot, Message.PeerId, FN);
+                    Result := SendDoc(Bot, Message.PeerId, Query);
                   end;
                 end;
               finally
