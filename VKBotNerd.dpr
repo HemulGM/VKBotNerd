@@ -35,20 +35,21 @@ begin
   with TVkBotChat.GetInstance(192458090, '892add820fa363f2db8e9d8fc80eaeb7880177233515368da7dd95f3092bc8596786e5d4eaee7b0f96ae2') do
   try
     AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TGeneralListener.Welcome);
+    AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TGeneralListener.CountMessages);
     AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TGeneralListener.Censor);
     AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TGeneralListener.Mute);
     AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TIpInfoListener.GetIpInfo);
     AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TOWMListener.GetCurrentWeather);
     AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TPingListener.Ping);
     AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TPingListener.HostToIp);
-    AddMessageListener([TVkPeerType.Chat], TGameShootListener.Proc);
+    AddMessageListener([{                }TVkPeerType.Chat], TGameShootListener.Proc);
     AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TVoiceListener.Proc);
     AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TVoiceListener.Anekdot);
     AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TBalabobaListener.SayForLast);
     AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TBalabobaListener.Say);
     AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TRandomNoiseListener.Proc);
-    AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TBalabobaListener.SaveLastMessage);
-    AddMessageListener([TVkPeerType.Chat], TGeneralListener.Ended);
+    AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TGeneralListener.SaveLastMessage);
+    AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TGeneralListener.Ended);
 
     if Init and Run then
       Console.Run(

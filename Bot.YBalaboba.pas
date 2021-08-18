@@ -12,7 +12,6 @@ type
   public
     class function Say(Bot: TVkBot; GroupId: Integer; Message: TVkMessage; ClientInfo: TVkClientInfo): Boolean; static;
     class function SayForLast(Bot: TVkBot; GroupId: Integer; Message: TVkMessage; ClientInfo: TVkClientInfo): Boolean; static;
-    class function SaveLastMessage(Bot: TVkBot; GroupId: Integer; Message: TVkMessage; ClientInfo: TVkClientInfo): Boolean; static;
   end;
 
 implementation
@@ -22,13 +21,6 @@ uses
   System.Net.HttpClient, System.JSON, Bot.DB;
 
 { TBalabobaListener }
-
-class function TBalabobaListener.SaveLastMessage(Bot: TVkBot; GroupId: Integer; Message: TVkMessage; ClientInfo: TVkClientInfo): Boolean;
-begin
-  Result := False;
-  if PeerIdIsUser(Message.FromId) then
-    DB.SetValue(Message.PeerId, 'last_message', Message.Text);
-end;
 
 class function TBalabobaListener.Say(Bot: TVkBot; GroupId: Integer; Message: TVkMessage; ClientInfo: TVkClientInfo): Boolean;
 var
@@ -53,7 +45,7 @@ begin
   Result := False;
   if MessagePatternValue(Message.Text, ['/бла последнее', 'зануда бла последнее'], Query) then
   begin
-    Query := DB.GetStrValue(Message.PeerId, 'last_message', '');
+    Query := DB.GetStrValue(Message.PeerId, 0, 'last_message', '');
     if not Query.IsEmpty then
     begin
       Bot.API.Messages.SendToPeer(Message.PeerId, '—очин€ю...');

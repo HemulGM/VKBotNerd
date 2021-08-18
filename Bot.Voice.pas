@@ -159,6 +159,8 @@ begin
 end;
 
 class function TVoiceListener.Proc(Bot: TVkBot; GroupId: Integer; Message: TVkMessage; ClientInfo: TVkClientInfo): Boolean;
+const
+  Limit = 1000;
 var
   Query: string;
   Del: Boolean;
@@ -172,9 +174,9 @@ begin
   end
   else
     Del := True;
-  if Query.Length > 157 then
+  if Query.Length > Limit then
   begin
-    Bot.API.Messages.SendToPeer(Message.PeerId, 'Слишком длинный текст');
+    Bot.API.Messages.SendToPeer(Message.PeerId, 'Слишком длинный текст. Можно максимум ' + Limit.ToString + ', а у тебя ' + Query.Length.ToString);
     Exit(True);
   end;
   if Query.IsEmpty then

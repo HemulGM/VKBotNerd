@@ -14,8 +14,11 @@ type
     class function Mute(Bot: TVkBot; GroupId: Integer; Message: TVkMessage; ClientInfo: TVkClientInfo): Boolean; static;
     class function Ended(Bot: TVkBot; GroupId: Integer; Message: TVkMessage; ClientInfo: TVkClientInfo): Boolean; static;
     class function Censor(Bot: TVkBot; GroupId: Integer; Message: TVkMessage; ClientInfo: TVkClientInfo): Boolean; static;
+    class function CountMessages(Bot: TVkBot; GroupId: Integer; Message: TVkMessage; ClientInfo: TVkClientInfo): Boolean; static;
+    class function SaveLastMessage(Bot: TVkBot; GroupId: Integer; Message: TVkMessage; ClientInfo: TVkClientInfo): Boolean; static;
     class procedure Init;
     class function CheckForCensor(Value: string; var FindWord: string): Boolean;
+  private
   end;
 
 implementation
@@ -59,6 +62,23 @@ begin
       finally
         Item.Free;
       end;
+  end;
+end;
+
+class function TGeneralListener.SaveLastMessage(Bot: TVkBot; GroupId: Integer; Message: TVkMessage; ClientInfo: TVkClientInfo): Boolean;
+begin
+  Result := False;
+  if PeerIdIsUser(Message.FromId) then
+    DB.SetValue(Message.PeerId, 0, 'last_message', Message.Text);
+end;
+
+class function TGeneralListener.CountMessages(Bot: TVkBot; GroupId: Integer; Message: TVkMessage; ClientInfo: TVkClientInfo): Boolean;
+begin
+  Result := False;
+  if PeerIdIsUser(Message.FromId) then
+  begin
+    DB.IncValue(Message.PeerId, Message.FromId, 'count');
+    DB.SetValue(Message.PeerId, Message.FromId, 'last_message_date', Now);
   end;
 end;
 
@@ -120,7 +140,7 @@ end;
 class function TGeneralListener.Censor(Bot: TVkBot; GroupId: Integer; Message: TVkMessage; ClientInfo: TVkClientInfo): Boolean;
 var
   i: Integer;
-  Str: string;
+  Str, Txt: string;
   Strs: TArrayOfString;
 begin
   Result := False;
@@ -133,7 +153,11 @@ begin
       'МАТА НЕ НАДА. НЕ НАДА МАТА.',
       'Фу, бля, матершинник.'];
     i := Random(Length(Strs));
-    Bot.API.Messages.SendToPeer(Message.PeerId, Format(Strs[i], [Str]));
+    Txt := Format(Strs[i], [Str]);
+    TDB.IncValue(Message.PeerId, Message.FromId, 'censor');
+    if Random(10) in [2, 5, 7] then
+      Txt := Txt + #13#10 + 'У тебя уже ' + TDB.GetIntValue(Message.PeerId, Message.FromId, 'censor', 1).ToString + ' мат.';
+    Bot.API.Messages.SendToPeer(Message.PeerId, Txt);
   end;
 end;
 
@@ -142,9 +166,9 @@ var
   Query: string;
 begin
   Result := False;
-  if MessagePatternValue(Message.Text, ['Зануда'], Query) and (not Query.IsEmpty) then
+  if MessagePatternValue(Message.Text, ['зануда '], Query) and (not Query.IsEmpty) then
   begin
-    Bot.API.Messages.SendToPeer(Message.PeerId, 'Сам такой');
+    Bot.API.Messages.SendToPeer(Message.PeerId, 'Сам ' + Query);
     Exit(True);
   end;
 end;
