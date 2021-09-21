@@ -36,7 +36,7 @@ begin
   try
     AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TGeneralListener.Welcome);
     AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TGeneralListener.CountMessages);
-    AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TGeneralListener.Censor);
+    //AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TGeneralListener.Censor);
     AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TGeneralListener.Mute);
     AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TIpInfoListener.GetIpInfo);
     AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TOWMListener.GetCurrentWeather);

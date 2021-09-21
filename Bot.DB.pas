@@ -175,6 +175,7 @@ begin
   Console.AddText('Database initializate...');
   if not Assigned(DB) then
     DB := TDB.Create;
+  DB.Synchronous := TSQLiteSynchronous.ssFULL;
   Console.AddLine('Ok', GREEN);
 end;
 
