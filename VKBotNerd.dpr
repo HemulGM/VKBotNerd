@@ -3,11 +3,7 @@ program VKBotNerd;
 {$APPTYPE CONSOLE}
 
 uses
-  System.SysUtils,
-  REST.Json,
-  VK.Bot,
-  VK.Types,
-  VK.Bot.Utils,
+  System.SysUtils, VK.Bot, VK.Types, VK.Bot.Utils,
   HGM.IpInfo in '..\IPInfo_API\HGM.IpInfo.pas',
   HGM.IPPing in '..\Ping\HGM.IPPing.pas',
   OWM.API in '..\OWM_API\OWM.API.pas',
@@ -32,7 +28,7 @@ begin
   ReportMemoryLeaksOnShutdown := True;
   TDB.Init;
   TGeneralListener.Init;
-  with TVkBotChat.GetInstance(192458090, '892add820fa363f2db8e9d8fc80eaeb7880177233515368da7dd95f3092bc8596786e5d4eaee7b0f96ae2') do
+  with TVkBotChat.GetInstance(192458090, {$INCLUDE BOT_TOKEN.key}) do
   try
     AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TGeneralListener.Welcome);
     AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TGeneralListener.CountMessages);

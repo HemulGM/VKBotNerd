@@ -71,3 +71,5 @@ modules/
 *.wav
 *.mp3
 Win32/Debug/audio_cache/desktop.ini
+BOT_TOKEN.key
+Win32/Release/data.db
