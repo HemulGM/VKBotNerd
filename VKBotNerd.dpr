@@ -3,6 +3,7 @@ program VKBotNerd;
 {$APPTYPE CONSOLE}
 
 uses
+  {$REGION USES}
   System.SysUtils, VK.Bot, VK.Types, VK.Bot.Utils,
   HGM.IpInfo in '..\IPInfo_API\HGM.IpInfo.pas',
   HGM.IPPing in '..\Ping\HGM.IPPing.pas',
@@ -23,6 +24,7 @@ uses
   bassenc in '..\#Fork\Bass\delphi\bassenc.pas',
   Bot.YBalaboba in 'Bot.YBalaboba.pas',
   Bot.RandomNoise in 'Bot.RandomNoise.pas';
+  {$ENDREGION}
 
 begin
   ReportMemoryLeaksOnShutdown := True;
