@@ -56,7 +56,6 @@ begin
 
     if not Query.IsEmpty then
     begin
-      Bot.API.Messages.New.PeerId(Message.PeerId).Message(Query).Keyboard(Keys).Send.Free;
       Bot.API.Messages.New.PeerId(Message.PeerId).Message(Query).Keyboard(Keys).Send;
       Exit(True);
     end;
