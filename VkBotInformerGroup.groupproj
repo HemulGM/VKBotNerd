@@ -24,7 +24,10 @@
         <Projects Include="..\VKBotTemplate\VKBotApp.dproj">
             <Dependencies/>
         </Projects>
-        <Projects Include="..\FMXAudio\Sample\VCLPlayer\VCLSample.dproj">
+        <Projects Include="..\TGBotMini\TGBotMini.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\TgBotFood\tgbot_food.dproj">
             <Dependencies/>
         </Projects>
     </ItemGroup>
@@ -98,23 +101,32 @@
     <Target Name="VKBotApp:Make">
         <MSBuild Projects="..\VKBotTemplate\VKBotApp.dproj" Targets="Make"/>
     </Target>
-    <Target Name="VCLSample">
-        <MSBuild Projects="..\FMXAudio\Sample\VCLPlayer\VCLSample.dproj"/>
+    <Target Name="TGBotMini">
+        <MSBuild Projects="..\TGBotMini\TGBotMini.dproj"/>
     </Target>
-    <Target Name="VCLSample:Clean">
-        <MSBuild Projects="..\FMXAudio\Sample\VCLPlayer\VCLSample.dproj" Targets="Clean"/>
+    <Target Name="TGBotMini:Clean">
+        <MSBuild Projects="..\TGBotMini\TGBotMini.dproj" Targets="Clean"/>
     </Target>
-    <Target Name="VCLSample:Make">
-        <MSBuild Projects="..\FMXAudio\Sample\VCLPlayer\VCLSample.dproj" Targets="Make"/>
+    <Target Name="TGBotMini:Make">
+        <MSBuild Projects="..\TGBotMini\TGBotMini.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="tgbot_food">
+        <MSBuild Projects="..\TgBotFood\tgbot_food.dproj"/>
+    </Target>
+    <Target Name="tgbot_food:Clean">
+        <MSBuild Projects="..\TgBotFood\tgbot_food.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="tgbot_food:Make">
+        <MSBuild Projects="..\TgBotFood\tgbot_food.dproj" Targets="Make"/>
     </Target>
     <Target Name="Build">
-        <CallTarget Targets="VKBotNerd;VKBotTemplate;Weather;OWM_Sample;VKComponents;GFCBot;VKBotApp;VCLSample"/>
+        <CallTarget Targets="VKBotNerd;VKBotTemplate;Weather;OWM_Sample;VKComponents;GFCBot;VKBotApp;TGBotMini;tgbot_food"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="VKBotNerd:Clean;VKBotTemplate:Clean;Weather:Clean;OWM_Sample:Clean;VKComponents:Clean;GFCBot:Clean;VKBotApp:Clean;VCLSample:Clean"/>
+        <CallTarget Targets="VKBotNerd:Clean;VKBotTemplate:Clean;Weather:Clean;OWM_Sample:Clean;VKComponents:Clean;GFCBot:Clean;VKBotApp:Clean;TGBotMini:Clean;tgbot_food:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="VKBotNerd:Make;VKBotTemplate:Make;Weather:Make;OWM_Sample:Make;VKComponents:Make;GFCBot:Make;VKBotApp:Make;VCLSample:Make"/>
+        <CallTarget Targets="VKBotNerd:Make;VKBotTemplate:Make;Weather:Make;OWM_Sample:Make;VKComponents:Make;GFCBot:Make;VKBotApp:Make;TGBotMini:Make;tgbot_food:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

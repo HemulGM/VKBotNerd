@@ -1,13 +1,26 @@
-unit Bot.Welcome;
+Ôªøunit Bot.Welcome;
 
 interface
 
 uses
-  System.SysUtils, System.Classes, VK.Bot, VK.Entity.Message,
+  System.SysUtils, System.Classes, VK.Bot, VK.Entity.Message, VK.Entity.Media,
   VK.Entity.ClientInfo;
 
 type
   TGeneralListener = class
+    const
+      Bot_ID = '[club192458090|@botnerd]';
+      HelpText = '/–∫–æ–º–∞–Ω–¥—ã - –°–ø–∏—Å–æ–∫ –∫–æ–º–∞–Ω–¥'#13#10 +
+'/ip {ip-–∞–¥—Ä–µ—Å} - –ü–æ–ª—É—á–∏—Ç—å –¥–∞–Ω–Ω—ã–µ –æ–± IP'#13#10 +
+'/–ø–æ–≥–æ–¥–∞ {–≥–æ—Ä–æ–¥} - –ü–æ–ª—É—á–∏—Ç—å –∏–Ω—Ñ–æ—Ä–º–∞—Ü–∏—é –æ –ø–æ–≥–æ–¥–µ'#13#10 +
+'/host {–∏–º—è —Ö–æ—Å—Ç–∞} - –£–∑–Ω–∞—Ç—å IP –ø–æ –∏–º–µ–Ω–∏ —Ö–æ—Å—Ç–∞'#13#10 +
+'/ping {–∏–º—è —Ö–æ—Å—Ç–∞ –∏–ª–∏ ip} - –ü—Ä–æ–ø–∏–Ω–≥–æ–≤–∞—Ç—å'#13#10 +
+'/–≥–µ–π —Ä—É–ª–µ—Ç–∫–∞ - –ì–µ–π —Ä—É–ª–µ—Ç–∫–∞'#13#10 +
+'/speak hide {—Ç–µ–∫—Å—Ç}, /—Å–∫–∞–∂–∏ –º–æ–ª—á–∞ {—Ç–µ–∫—Å—Ç}, /speak {—Ç–µ–∫—Å—Ç}, /—Å–∫–∞–∂–∏ {—Ç–µ–∫—Å—Ç} - –û–∑–≤—É—á–∏—Ç—å —Ç–µ–∫—Å—Ç'#13#10 +
+'/joke, /–∞–Ω–µ–∫–¥–æ—Ç - –†–∞—Å—Å–∫–∞–∑–∞—Ç—å —Ç—É–ø–æ–π –∞–Ω–µ–∫–¥–æ—Ç (–≥–æ–ª–æ—Å)'#13#10 +
+'/balaboba {—Ç–µ–∫—Å—Ç}, –∑–∞–Ω—É–¥–∞ –±–∞–ª–∞–±–æ–±–∞ {—Ç–µ–∫—Å—Ç}, /–±–ª–∞ {—Ç–µ–∫—Å—Ç} - –°–æ—á–∏–Ω–∏—Ç—å –∏—Å—Ç–æ—Ä–∏—é'#13#10 +
+'/–±–ª–∞ –ø–æ—Å–ª–µ–¥–Ω–µ–µ, –∑–∞–Ω—É–¥–∞ –±–ª–∞ –ø–æ—Å–ª–µ–¥–Ω–µ–µ - –°–æ—á–∏–Ω–∏—Ç—å –∏—Å—Ç–æ—Ä–∏—é –Ω–∞ –ø–æ—Å–ª–µ–¥–Ω–µ–µ —Å–æ–æ–±—â–µ–Ω–∏–µ'#13#10 +
+'/–∑–≤—É–∫ {—Ç–µ–∫—Å—Ç} - –ù–∞–π—Ç–∏ —Å–ª—É—á–∞–π–Ω—É—é –∑–≤—É–∫–æ–≤—É—é –¥–æ—Ä–æ–∂–∫—É –ø–æ —Ç–µ–∫—Å—Ç—É';
     class var
       CensorWords: TStringList;
     class function Welcome(Bot: TVkBot; GroupId: Integer; Message: TVkMessage; ClientInfo: TVkClientInfo): Boolean; static;
@@ -18,14 +31,16 @@ type
     class function SaveLastMessage(Bot: TVkBot; GroupId: Integer; Message: TVkMessage; ClientInfo: TVkClientInfo): Boolean; static;
     class procedure Init;
     class function CheckForCensor(Value: string; var FindWord: string): Boolean;
+    class function Sticker(Bot: TVkBot; GroupId: Integer; Message: TVkMessage; ClientInfo: TVkClientInfo): Boolean; static;
   private
+    class procedure SendAskHelp(Bot: TVkBot; GroupId: Integer; Message: TVkMessage; ClientInfo: TVkClientInfo); static;
   end;
 
 implementation
 
 uses
   VK.Types, VK.Bot.Utils, HGM.SQLang, System.IOUtils, Bot.DB,
-  VK.Entity.ScreenName;
+  VK.Entity.ScreenName, VK.Entity.Keyboard, System.StrUtils, VK.Entity.Sticker;
 
 { TGeneralListener }
 
@@ -52,33 +67,43 @@ var
   UserId: Integer;
 begin
   Result := False;
-  if MessagePatternValue(Message.Text, ['/mute '], Query) and (not Query.IsEmpty) then
-  begin
-    if Query.StartsWith('[') then
-      if Bot.API.Utils.ResolveScreenName(Item, ParseUserAlias(Query).UserId) then
-      try
-        UserId := Item.ObjectId;
-        Bot.API.Messages.SendToPeer(Message.PeerId, 'Mute: ' + UserId.ToString + ', you is admin = ' + TVkBotChat(Bot).IsAdmin(Message.PeerId, Message.FromId).ToString);
-      finally
-        Item.Free;
-      end;
+  try
+    if MessagePatternValue(Message.Text, ['/mute '], Query) and (not Query.IsEmpty) then
+    begin
+      if Query.StartsWith('[') then
+        if Bot.API.Utils.ResolveScreenName(Item, ParseUserAlias(Query).UserId) then
+        try
+          UserId := Item.ObjectId;
+          Bot.API.Messages.SendToPeer(Message.PeerId, 'Mute: ' + UserId.ToString + ', you is admin = ' + TVkBotChat(Bot).IsAdmin(Message.PeerId, Message.FromId).ToString);
+        finally
+          Item.Free;
+        end;
+    end;
+  except
   end;
 end;
 
 class function TGeneralListener.SaveLastMessage(Bot: TVkBot; GroupId: Integer; Message: TVkMessage; ClientInfo: TVkClientInfo): Boolean;
 begin
   Result := False;
-  if PeerIdIsUser(Message.FromId) then
-    DB.SetValue(Message.PeerId, 0, 'last_message', Message.Text);
+  try
+    if PeerIdIsUser(Message.FromId) then
+      DB.SetValue(Message.PeerId, 0, 'last_message', Message.Text);
+  except
+  end;
 end;
 
 class function TGeneralListener.CountMessages(Bot: TVkBot; GroupId: Integer; Message: TVkMessage; ClientInfo: TVkClientInfo): Boolean;
 begin
   Result := False;
-  if PeerIdIsUser(Message.FromId) then
-  begin
-    DB.IncValue(Message.PeerId, Message.FromId, 'count');
-    DB.SetValue(Message.PeerId, Message.FromId, 'last_message_date', Now);
+  try
+    if PeerIdIsUser(Message.FromId) then
+    begin
+      DB.IncValue(Message.PeerId, Message.FromId, 'count');
+      DB.SetValue(Message.PeerId, Message.FromId, 'last_message_date', Now);
+    end;
+  except
+    //
   end;
 end;
 
@@ -88,39 +113,83 @@ var
   Query: string;
 begin
   Result := False;
-  Id := DB.GetTableValue('SELECT id FROM users WHERE chat_id = ? AND user_id = ?', [Message.PeerId, Message.FromId]);
-  if Id < 0 then
-    DB.ExecSQL('INSERT INTO users (chat_id, user_id, date) VALUES (?, ?, ?)', [Message.PeerId, Message.FromId, Now])
-  else
-    DB.ExecSQL('UPDATE users SET chat_id = ?, user_id = ?, date = ? WHERE id = ?', [Message.PeerId, Message.FromId, Now, Id]);
-  //
-  case Message.Action.&Type of
-    TVkMessageActionType.ChatInviteUser:
-      Bot.API.Messages.SendToPeer(Message.PeerId, 'Welcum');
-    TVkMessageActionType.ChatKickUser:
-      Bot.API.Messages.SendToPeer(Message.PeerId, 'Bye bye, loser');
+  try
+    Id := DB.GetTableValue('SELECT id FROM users WHERE chat_id = ? AND user_id = ?', [Message.PeerId, Message.FromId]);
+    if Id < 0 then
+      DB.ExecSQL('INSERT INTO users (chat_id, user_id, date) VALUES (?, ?, ?)', [Message.PeerId, Message.FromId, Now])
+    else
+      DB.ExecSQL('UPDATE users SET chat_id = ?, user_id = ?, date = ? WHERE id = ?', [Message.PeerId, Message.FromId, Now, Id]);
+    //
+    if Assigned(Message.Action) then
+      case Message.Action.&Type of
+        TVkMessageActionType.ChatInviteUser:
+          Bot.API.Messages.SendToPeer(Message.PeerId, 'Welcum');
+        TVkMessageActionType.ChatKickUser:
+          Bot.API.Messages.SendToPeer(Message.PeerId, 'Bye bye, loser');
+      end;
+    if MessagePatternValue(Message.Text, ['–ó–∞–Ω—É–¥–∞', Bot_ID], Query) and Query.IsEmpty then
+    begin
+      Bot.API.Messages.SendToPeer(Message.PeerId, '–ê?');
+    end;
+    if MessagePatternValue(Message.Text, ['/–∫–æ–º–∞–Ω–¥—ã', '–∑–∞–Ω—É–¥–∞ –∫–æ–º–∞–Ω–¥—ã'], Query) then
+    begin
+      Result := True;
+      Bot.API.Messages.SendToPeer(Message.PeerId, HelpText);
+    end;
+    if Assigned(Message.PayloadButton) then
+    begin
+      case IndexStr(Message.PayloadButton.Button, ['ask_help_yes', 'ask_help_no']) of
+        0:
+          begin
+            if Random(6) = 2 then
+              Query := '–ù—É, –∫–∞—Ä–æ—á–µ...' + #13#10 +
+                HelpText
+            else
+              Query := '–í–æ—Ç, –±–æ–ª–≤–∞–Ω, ' + #13#10 +
+                HelpText;
+          end;
+        1:
+          if Random(6) = 2 then
+            Query := '–ü–∏–¥–æ—Ä–∞ –æ—Ç–≤–µ—Ç'
+          else
+            Query := '–¢–æ–≥–¥–∞ –Ω–µ —É–ø–æ–º–∏–Ω–∞–π –º–æ—ë –∏–º—è –≤ —Å—É–µ!';
+      else
+        Query := '';
+      end;
+
+      if not Query.IsEmpty then
+      begin
+        Bot.API.Messages.New.PeerId(Message.PeerId).Message(Query).Send;
+        Exit(True);
+      end;
+    end
+    else if MessagePatternValue(Message.Text, [Bot_ID], Query) and not Query.IsEmpty then
+    begin
+      SendAskHelp(Bot, GroupId, Message, ClassInfo);
+      Exit(True);
+    end;
+  except
   end;
-  if MessagePatternValue(Message.Text, ['«‡ÌÛ‰‡'], Query) and Query.IsEmpty then
-  begin
-    Bot.API.Messages.SendToPeer(Message.PeerId, '¿?');
+end;
+
+class procedure TGeneralListener.SendAskHelp(Bot: TVkBot; GroupId: Integer; Message: TVkMessage; ClientInfo: TVkClientInfo);
+var
+  Keys: string;
+  Keyboard: TVkKeyboardConstruct;
+begin
+  Keyboard := TVkKeyboard.Construct;
+  try
+    Keyboard.InlineKeys(True);
+    with Keyboard.AddLine do
+    begin
+      AddButton(TVkKeyboardButtonConstruct.CreateText('–î–∞', ButtonPayload('ask_help_yes'), TVkKeyboardButtonColor.Positive));
+      AddButton(TVkKeyboardButtonConstruct.CreateText('–ù–µ—Ç', ButtonPayload('ask_help_no'), TVkKeyboardButtonColor.Secondary));
+    end;
+    Keys := Keyboard.ToJsonString;
+  finally
+    Keyboard.Free;
   end;
-  if MessagePatternValue(Message.Text, ['/ÍÓÏ‡Ì‰˚', 'Á‡ÌÛ‰‡ ÍÓÏ‡Ì‰˚'], Query) then
-  begin
-    Result := True;
-    Bot.API.Messages.SendToPeer(Message.PeerId,
-      '/ÍÓÏ‡Ì‰˚ - —ÔËÒÓÍ ÍÓÏ‡Ì‰'#13#10 +
-      '/ip {ip-‡‰ÂÒ} - œÓÎÛ˜ËÚ¸ ‰‡ÌÌ˚Â Ó· IP'#13#10 +
-      '/ÔÓ„Ó‰‡ {„ÓÓ‰} - œÓÎÛ˜ËÚ¸ ËÌÙÓÏ‡ˆË˛ Ó ÔÓ„Ó‰Â'#13#10 +
-      '/host {ËÏˇ ıÓÒÚ‡} - ”ÁÌ‡Ú¸ IP ÔÓ ËÏÂÌË ıÓÒÚ‡'#13#10 +
-      '/ping {ËÏˇ ıÓÒÚ‡ ËÎË ip} - œÓÔËÌ„Ó‚‡Ú¸'#13#10 +
-      '/„ÂÈ ÛÎÂÚÍ‡ - √ÂÈ ÛÎÂÚÍ‡'#13#10 +
-      '/speak hide {ÚÂÍÒÚ}, /ÒÍ‡ÊË ÏÓÎ˜‡ {ÚÂÍÒÚ}, /speak {ÚÂÍÒÚ}, /ÒÍ‡ÊË {ÚÂÍÒÚ} - ŒÁ‚Û˜ËÚ¸ ÚÂÍÒÚ'#13#10 +
-      '/joke, /‡ÌÂÍ‰ÓÚ - –‡ÒÒÍ‡Á‡Ú¸ ÚÛÔÓÈ ‡ÌÂÍ‰ÓÚ („ÓÎÓÒ)'#13#10 +
-      '/balaboba {ÚÂÍÒÚ}, Á‡ÌÛ‰‡ ·‡Î‡·Ó·‡ {ÚÂÍÒÚ}, /·Î‡ {ÚÂÍÒÚ} - —Ó˜ËÌËÚ¸ ËÒÚÓË˛'#13#10 +
-      '/·Î‡ ÔÓÒÎÂ‰ÌÂÂ, Á‡ÌÛ‰‡ ·Î‡ ÔÓÒÎÂ‰ÌÂÂ - —Ó˜ËÌËÚ¸ ËÒÚÓË˛ Ì‡ ÔÓÒÎÂ‰ÌÂÂ ÒÓÓ·˘ÂÌËÂ'#13#10 +
-      '/Á‚ÛÍ {ÚÂÍÒÚ} - Õ‡ÈÚË ÒÎÛ˜‡ÈÌÛ˛ Á‚ÛÍÓ‚Û˛ ‰ÓÓÊÍÛ ÔÓ ÚÂÍÒÚÛ'
-      );
-  end;
+  Bot.API.Messages.New.PeerId(Message.PeerId).Message('–¢—ã —á–µ, –Ω–µ –∑–Ω–∞–µ—à—å —á–µ —Å–ø—Ä–æ—Å–∏—Ç—å?').Keyboard(Keys).Send;
 end;
 
 class function TGeneralListener.CheckForCensor(Value: string; var FindWord: string): Boolean;
@@ -147,17 +216,28 @@ begin
   if CheckForCensor(Message.Text.ToLowerInvariant, Str) then
   begin
     Strs := [
-      'ƒ‡‚‡È ·ÂÁ Ï‡Ú‡, ÓÍ? ﬂ Ò˜ËÚ‡˛, ˜ÚÓ ÒÎÓ‚Ó "%s" - Ï‡Ú.',
-      'ÃÓÊÂÚ ·ÂÁ Ï‡Ú‡, ‡? ›ÚÓ "%s" Ê - Ï‡Ú. ¬Ó‰Â Í‡Í.',
-      '—ÎÛ¯‡È, ÏÓÊÂÚ Ú˚ Á‡‚‡ÎË¯¸ ‚‡ÂÊÍÛ? Ã‡ÚÂËÚÒˇ ÓÌ ÚÛÚ.',
-      'Ã¿“¿ Õ≈ Õ¿ƒ¿. Õ≈ Õ¿ƒ¿ Ã¿“¿.',
-      '‘Û, ·Îˇ, Ï‡ÚÂ¯ËÌÌËÍ.'];
+      '–î–∞–≤–∞–π –±–µ–∑ –º–∞—Ç–∞, –æ–∫? –Ø —Å—á–∏—Ç–∞—é, —á—Ç–æ —Å–ª–æ–≤–æ "%s" - –º–∞—Ç.',
+      '–ú–æ–∂–µ—Ç –±–µ–∑ –º–∞—Ç–∞, –∞? –≠—Ç–æ "%s" –∂ - –º–∞—Ç. –í—Ä–æ–¥–µ –∫–∞–∫.',
+      '–°–ª—É—à–∞–π, –º–æ–∂–µ—Ç —Ç—ã –∑–∞–≤–∞–ª–∏—à—å –≤–∞—Ä–µ–∂–∫—É? –ú–∞—Ç–µ—Ä–∏—Ç—Å—è –æ–Ω —Ç—É—Ç.',
+      '–ú–ê–¢–ê –ù–ï –ù–ê–î–ê. –ù–ï –ù–ê–î–ê –ú–ê–¢–ê.',
+      '–§—É, –±–ª—è, –º–∞—Ç–µ—Ä—à–∏–Ω–Ω–∏–∫.'];
     i := Random(Length(Strs));
     Txt := Format(Strs[i], [Str]);
     TDB.IncValue(Message.PeerId, Message.FromId, 'censor');
     if Random(10) in [2, 5, 7] then
-      Txt := Txt + #13#10 + '” ÚÂ·ˇ ÛÊÂ ' + TDB.GetIntValue(Message.PeerId, Message.FromId, 'censor', 1).ToString + ' Ï‡Ú.';
+      Txt := Txt + #13#10 + '–£ —Ç–µ–±—è —É–∂–µ ' + TDB.GetIntValue(Message.PeerId, Message.FromId, 'censor', 1).ToString + ' –º–∞—Ç.';
     Bot.API.Messages.SendToPeer(Message.PeerId, Txt);
+  end;
+end;
+
+class function TGeneralListener.Sticker(Bot: TVkBot; GroupId: Integer; Message: TVkMessage; ClientInfo: TVkClientInfo): Boolean;
+var
+  Sticker: TVkSticker;
+begin
+  Result := False;
+  if Message.Attachments.GetByType(TVkAttachmentType.Sticker, Sticker) then
+  begin
+    Bot.API.Messages.SendToPeer(Message.PeerId, Sticker.StickerId.ToString);
   end;
 end;
 
@@ -166,9 +246,9 @@ var
   Query: string;
 begin
   Result := False;
-  if MessagePatternValue(Message.Text, ['Á‡ÌÛ‰‡ '], Query) and (not Query.IsEmpty) then
+  if MessagePatternValue(Message.Text, ['–∑–∞–Ω—É–¥–∞ '], Query) and (not Query.IsEmpty) then
   begin
-    Bot.API.Messages.SendToPeer(Message.PeerId, '—‡Ï ' + Query);
+    Bot.API.Messages.SendToPeer(Message.PeerId, '–°–∞–º ' + Query);
     Exit(True);
   end;
 end;

@@ -70,27 +70,31 @@ begin
   Stream := TStringStream.Create;
   Response := TStringStream.Create;
   try
-    {$WARNINGS OFF}
-    Stream.WriteString('{"query":"' + Text + '","intro":0,"filter":1}');
-    Stream.Position := 0;
-    if Client.Post('https://zeapi.yandex.net/lab/api/yalm/text3', Stream, Response).StatusCode = 200 then
     try
-      JSON := TJSONObject(TJSONObject.ParseJSONValue(UTF8ToString(Response.DataString)));
-      Query := JSON.GetValue('query', '') + JSON.GetValue('text', '');
-      if not Query.IsEmpty then
-      begin
-        Bot.API.Messages.New.PeerId(PeerId).Message(Query).Send.Free;
-        Result := True;
+      {$WARNINGS OFF}
+      Stream.WriteString('{"query":"' + Text + '","intro":0,"filter":1}');
+      Stream.Position := 0;
+      if Client.Post('https://zeapi.yandex.net/lab/api/yalm/text3', Stream, Response).StatusCode = 200 then
+      try
+        JSON := TJSONObject(TJSONObject.ParseJSONValue(UTF8ToString(Response.DataString)));
+        Query := JSON.GetValue('query', '') + JSON.GetValue('text', '');
+        if not Query.IsEmpty then
+        begin
+          Bot.API.Messages.New.PeerId(PeerId).Message(Query).Send;
+          Result := True;
+        end;
+      except
+        on E: Exception do
+          Console.AddLine('TBalabobaListener.SendBla: ' + E.Message, RED);
       end;
-    except
-      on E: Exception do
-        Console.AddLine('TBalabobaListener.SendBla: ' + E.Message, RED);
+      {$WARNINGS ON}
+    finally
+      Response.Free;
+      Stream.Free;
+      Client.Free;
     end;
-    {$WARNINGS ON}
-  finally
-    Response.Free;
-    Stream.Free;
-    Client.Free;
+  except
+    Result := False;
   end;
 end;
 

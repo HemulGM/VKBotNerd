@@ -32,10 +32,12 @@ begin
   TGeneralListener.Init;
   with TVkBotChat.GetInstance(192458090, {$INCLUDE BOT_TOKEN.key}) do
   try
+    SkipOtherBotMessages := False;
     AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TGeneralListener.Welcome);
     AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TGeneralListener.CountMessages);
     //AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TGeneralListener.Censor);
-    AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TGeneralListener.Mute);
+    AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TGeneralListener.Sticker);
+    //AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TGeneralListener.Mute);
     AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TIpInfoListener.GetIpInfo);
     AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TOWMListener.GetCurrentWeather);
     AddMessageListener([TVkPeerType.User, TVkPeerType.Chat], TPingListener.Ping);

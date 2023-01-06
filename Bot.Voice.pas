@@ -118,10 +118,11 @@ begin
     if TDownload.GetText('http://rzhunemogu.ru/RandJSON.aspx?CType=1', Query) then
     begin
       try
-        Json := TJSONObject(TJSONObject.ParseJSONValue(Query));
+        Json := TJSONObject.ParseJSONValue(Query) as TJSONObject;
       except
         Continue;
       end;
+      if Assigned(Json) then
       try
         Query := Json.GetValue('content', '');
         if (Query.Length < 170) and (not Query.IsEmpty) then
@@ -197,8 +198,8 @@ initialization
     Console.AddText('Voice initializate...');
     TVoiceListener.FVoice := TSpVoice.Create(nil);
     Tokens := TVoiceListener.FVoice.GetVoices('', '');
-    Console.AddLine(Tokens.Item(2).GetDescription(LOCALE_USER_DEFAULT), GREEN);
-    TVoiceListener.FVoice.Voice := Tokens.Item(2);
+    Console.AddLine(Tokens.Item(0).GetDescription(LOCALE_USER_DEFAULT), GREEN);
+    TVoiceListener.FVoice.Voice := Tokens.Item(0);
   except
   end;
   Console.Addtext('Bass initializate...');
